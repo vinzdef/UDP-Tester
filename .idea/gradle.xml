@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$USER_HOME$/Sync/Workspace/Android/UDPconnecter" />
-            <option value="$USER_HOME$/Sync/Workspace/Android/UDPconnecter/app" />
+            <option value="$USER_HOME$/Sync/Workspace/Android/UDP-Tester" />
+            <option value="$USER_HOME$/Sync/Workspace/Android/UDP-Tester/app" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDPconnecter/UDPconnecter.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDPconnecter/UDPconnecter.iml" />
+      <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDP-Tester/UDP-Tester.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDP-Tester/UDP-Tester.iml" />
       <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDPconnecter/app/app.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDPconnecter/app/app.iml" />
     </modules>
   </component>

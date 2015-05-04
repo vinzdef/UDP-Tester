@@ -111,7 +111,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, Boolean>
         if (justConnected)
         {
             new AlertDialog.Builder(parentActivity)
-                    .setTitle("PACKET INFO")
+                    .setTitle("SOCKET INFO")
                     .setMessage(remoteMsg + "\n" + localMsg)
                     .setCancelable(true)
                     .create()
@@ -122,7 +122,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, Boolean>
         {
             SnackbarManager.show(
                     Snackbar.with(parentActivity)
-                            .text((justConnected ? "Connected" : (success ? "Packet recieved" : "Error")))
+                            .text((justConnected ? "Connected" : (success ? "Packet recieved" : "Socket Error")))
             );
 
 
