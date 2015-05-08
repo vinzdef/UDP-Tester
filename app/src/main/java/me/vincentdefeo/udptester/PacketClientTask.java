@@ -1,6 +1,7 @@
 package me.vincentdefeo.udptester;
 
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -11,87 +12,93 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 
 /**
  * Created by ghzmdr on 30/04/15.
  */
 
-public class PacketClientTask extends AsyncTask<Void, Void, Boolean>
+public class PacketClientTask extends AsyncTask<Void, Void, String>
 {
-    protected static boolean alreadyConnected = false, justConnected = true;
+    protected static boolean alreadyConnected = false, justConnected;
 
     private String message = "UDP Tester";
-    private String response;
 
-    private String host;
-    private int port;
+    private String hostname;
+    private int port, localPort = 0;
     private String remoteMsg, localMsg;
 
     private MainActivity parentActivity;
 
     DatagramSocket socket = null;
 
+    private boolean receive = false, send = false;
+
 
     @Override
     protected void onCancelled()
     {
-        socket.close();
+        reset();
     }
 
-    PacketClientTask(String host, int port, MainActivity parentActivity, String message)
+    private void reset()
     {
-        super();
+        if (socket != null) socket.close();
+        alreadyConnected = false;
+    }
 
-        this.host= host;
+    PacketClientTask(String hostname, int port, @Nullable Integer localPort, MainActivity parentActivity, @Nullable String message, boolean send, boolean receive)
+    {
+        this.hostname = hostname;
         this.port = port;
+        if (localPort != null) this.localPort = localPort;
 
-        this.message = message;
+        if (message != null) this.message = message;
         this.parentActivity = parentActivity;
+        this.receive = receive;
+        this.send = send;
     }
 
     @Override
-    protected Boolean doInBackground(Void... params)
+    protected String doInBackground(Void... params)
     {
+        String payload = null;
         try {
-            InetAddress hostAddr = InetAddress.getByName(host);
 
+            if (localPort != 0) socket = new DatagramSocket(localPort);
+            else socket = new DatagramSocket();
 
-            try {
-                socket = new DatagramSocket(8080);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
+            socket.connect(InetAddress.getByName(hostname), port);
 
-            socket.connect(hostAddr, port);
-
-            if (!alreadyConnected)
+            if (!alreadyConnected && send)
             {
-                byte[] buffer = message.getBytes();
-                DatagramPacket packet = new DatagramPacket(buffer, message.length(), hostAddr, port);
-                logSocketData(socket);
-                socket.send(packet);
+                byte[] requestBuffer = message.getBytes();
+                DatagramPacket connectionPacket = new DatagramPacket(requestBuffer, requestBuffer.length);
+                Log.d("TEST THIS", "" + socket.isConnected());
+                socket.send(connectionPacket);
                 alreadyConnected = true;
                 justConnected = true;
             }
 
-            byte[] recBuffer = new byte[200];
-            DatagramPacket recPacket = new DatagramPacket(recBuffer, recBuffer.length);
-            socket.receive(recPacket);
-            byte[] finalData = new byte[recPacket.getLength()];
-            System.arraycopy(recBuffer, 0, finalData, 0, recPacket.getLength());
+            if (receive)
+            {
+                byte[] recBuffer = new byte[3000];
+                DatagramPacket packet = new DatagramPacket(recBuffer, recBuffer.length);
+                socket.receive(packet);
 
-            response = new String(finalData, "UTF-8");
+                byte[] dataBuffer = new byte[packet.getLength()];
+                System.arraycopy(recBuffer, 0, dataBuffer, 0, packet.getLength());
+                payload = new String(dataBuffer, "UTF-8");
+            }
+            logSocketData(socket);
 
-        } catch (IOException  e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            alreadyConnected = false;
-            return false;
         } finally {
-            socket.close();
+            if (socket != null) {
+                socket.close();
+            }
+            return payload;
         }
-
-        return true;
     }
 
     private void logSocketData(DatagramSocket socket)
@@ -104,31 +111,27 @@ public class PacketClientTask extends AsyncTask<Void, Void, Boolean>
     }
 
     @Override
-    protected void onPostExecute(Boolean success)
+    protected void onPostExecute(String payload)
     {
-        super.onPostExecute(success);
+        super.onPostExecute(payload);
+
 
         if (justConnected)
-        {
-            new AlertDialog.Builder(parentActivity)
-                    .setTitle("SOCKET INFO")
-                    .setMessage(remoteMsg + "\n" + localMsg)
-                    .setCancelable(true)
-                    .create()
-                    .show();
+        new AlertDialog.Builder(parentActivity)
+                .setTitle("SOCKET INFO")
+                .setMessage(remoteMsg + "\n" + localMsg)
+                .setCancelable(true)
+                .create()
+                .show();
+
+        SnackbarManager.show(
+                Snackbar.with(parentActivity)
+                        .text((justConnected ? (!receive ? "Sent" : "Connected") : (payload != null ? "Packet received" : "Socket Error")))
+        );
+
+        if (receive) {
+            parentActivity.showResult(payload != null ? payload : "Error retrieving response");
+            if (payload != null) justConnected = false;
         }
-
-        if (success)
-        {
-            SnackbarManager.show(
-                    Snackbar.with(parentActivity)
-                            .text((justConnected ? "Connected" : (success ? "Packet recieved" : "Socket Error")))
-            );
-
-
-            parentActivity.showResult(response != null ? response : "Error retrieving response");
-        }
-
-        if (success) justConnected = false;
     }
 }

@@ -1,71 +1,150 @@
 package me.vincentdefeo.udptester;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Button;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
 {
 
     public final static String TAG = "UDP_SENDER";
 
     @InjectView(R.id.server_host) EditText serverHostET;
     @InjectView(R.id.server_port) EditText serverPortET;
+    @InjectView(R.id.local_port) EditText localPortET;
     @InjectView(R.id.message) EditText messageET;
 
     @InjectView(R.id.response_data) TextView responseText;
 
-    @InjectView(R.id.send_request) Button sendRequest;
-    @InjectView(R.id.reset_request) Button resetRequest;
+    @InjectView(R.id.reset_fab)
+    FloatingActionButton resetFab;
+
+    @InjectView(R.id.fab_menu)
+    FloatingActionsMenu fabMenu;
 
     @InjectView(R.id.status) TextView statusText;
 
     PacketClientTask pct;
-
-    private String serverHost;
-    private int serverPort;
+    private boolean recieve = false, send = false;
 
     private boolean resetted = false;
 
-    @OnClick(R.id.send_request)
-    public void sendUDP()
+    @OnClick(R.id.send_recieve_fab)
+    public void sendAndReceive()
     {
-        sendRequest.setEnabled(false);
-        resetRequest.setEnabled(true);
+        send = true;
+        recieve = true;
 
-        serverHost = serverHostET.getText().toString();
-        serverPort = Integer.parseInt(serverPortET.getText().toString());
-        resetted = false;
-        pct = new PacketClientTask(serverHost, serverPort, MainActivity.this, messageET.getText().toString());
-        pct.execute();
+        startUDP();
         statusText.setText("LISTENING FOR INCOMING PACKETS");
     }
 
-    @OnClick(R.id.reset_request)
+    @OnClick(R.id.send_fab)
+    public void send()
+    {
+        send = true;
+        recieve = false;
+
+        startUDP();
+        statusText.setText("SENDING");
+    }
+
+
+    @OnClick(R.id.recieve_fab)
+    public void recieve()
+    {
+        send = false;
+        recieve = true;
+
+        startUDP();
+        statusText.setText("LISTENING FOR INCOMING PACKETS");
+    }
+
+    private void startUDP()
+    {
+        resetted = false;
+        fabMenu.collapse();
+
+        String requiredMsg = "These fields are required:\n";
+        boolean invalidForm = false;
+
+        if (serverHostET.getText().toString().equals("")) {
+            requiredMsg += "\nHOSTNAME";
+            invalidForm = true;
+        }
+
+        if (serverPortET.getText().toString().equals("")) {
+            requiredMsg += "\nHOST PORT";
+            invalidForm = true;
+        }
+
+        if (invalidForm) {
+            new AlertDialog.Builder(this).setTitle("Invalid Parameters").setMessage(requiredMsg).create().show();
+            return;
+        }
+
+        if (recieve) {
+            fabMenu.setVisibility(View.GONE);
+            resetFab.setVisibility(View.VISIBLE);
+        }
+
+        String serverHost = serverHostET.getText().toString();
+        int serverPort = Integer.parseInt(serverPortET.getText().toString());
+
+        Integer localPort = null;
+
+        try {
+            localPort = Integer.parseInt(localPortET.getText().toString());
+        } catch (Exception e){
+
+        }
+
+        String message = null;
+        if (messageET.getText().toString() != "")
+            message = messageET.getText().toString();
+
+        pct = new PacketClientTask(serverHost, serverPort, localPort, MainActivity.this, message, send, recieve);
+        pct.execute();
+    }
+
+    @OnClick(R.id.reset_fab)
     public void resetConnection()
     {
-        sendRequest.setEnabled(true);
-        resetRequest.setEnabled(false);
-
-        pct.cancel(true);
         resetted = true;
-        statusText.setText("NOT CONNECTED");
+        pct.cancel(true);
+
+        resetFab.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.VISIBLE);
+
+        recieve = false;
+        send = false;
+
+        statusText.setText("IDLE");
     }
 
     protected void showResult(String data)
     {
-        responseText.setText(data);
+        if (recieve) responseText.setText(data);
 
-        if (!resetted)
-            sendUDP();
+        if (!(send && recieve))
+            PacketClientTask.alreadyConnected = false;
+
+        if (!resetted && recieve)
+            sendAndReceive();
 
         Log.d(TAG, "DATA: " + data);
     }
@@ -76,6 +155,9 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
+
+        resetFab.setVisibility(View.GONE);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#009688")));
     }
 /*
 

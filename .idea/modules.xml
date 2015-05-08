@@ -3,8 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDP-Tester/UDP-Tester.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDP-Tester/UDP-Tester.iml" />
-      <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDPconnecter/app/app.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDPconnecter/app/app.iml" />
+      <module fileurl="file://$USER_HOME$/Sync/Workspace/Android/UDP-Tester/app/app.iml" filepath="$USER_HOME$/Sync/Workspace/Android/UDP-Tester/app/app.iml" />
     </modules>
   </component>
 </project>
-
