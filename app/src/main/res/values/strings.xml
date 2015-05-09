@@ -1,6 +1,16 @@
 <resources>
     <string name="app_name">UDP Tester</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="info_text">
+        <h2><b>OpenSource Libraries:</b></h2>
+        \n\n
+        <a href="https://github.com/nispok/snackbar">SnackBar</a>
+        \n
+        <a href="https://github.com/futuresimple/android-floating-action-button/">FloatingActionButton</a>
+        \n\n\n
+        <h2><b>Crafted by </b> <a href="http://vincentdefeo.me">Vincent</a></h2>
+        \n\n
+        GitHubRepo: <a href="https://github.com/ghzmdr/UDP-Tester">UDP-Tester</a>
+    </string>
+
 </resources>

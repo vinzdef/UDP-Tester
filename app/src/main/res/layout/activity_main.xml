@@ -52,7 +52,6 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:text="vincentdefeo.me"
                     android:layout_weight="2"
                     android:id="@+id/server_host"
                     android:hint="HOSTNAME"
@@ -61,7 +60,6 @@
 
 
                 <EditText
-                    android:text="4444"
                     android:id="@+id/server_port"
                     android:layout_weight="5"
                     android:hint="PORT"
@@ -131,8 +129,8 @@
                     android:background="@drawable/up_left_tip"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp" />
+                    android:layout_width="15dp"
+                    android:layout_height="15dp" />
             </RelativeLayout>
 
         </LinearLayout>
@@ -176,7 +174,6 @@
         fab:fab_expandDirection="up"
         fab:fab_labelsPosition="left"
 
-        fab:fab_icon="@drawable/ic_send_grey600_36dp"
         fab:fab_addButtonColorNormal="#009688"
         fab:fab_addButtonColorPressed="#26A69A">
 
@@ -187,7 +184,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            fab:fab_icon="@drawable/ic_chevron_down_black_36dp"
+            fab:fab_icon="@drawable/ic_chevron_down_grey600_36dp"
             fab:fab_colorNormal="#fff"
             fab:fab_size="mini"
             fab:fab_title="Recieve"
@@ -197,7 +194,7 @@
             android:id="@+id/send_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_chevron_up_black_36dp"
+            fab:fab_icon="@drawable/ic_chevron_up_grey600_36dp"
             fab:fab_colorNormal="#fff"
             fab:fab_size="mini"
             fab:fab_title="Send"
@@ -207,7 +204,7 @@
             android:id="@+id/send_recieve_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_unfold_more_black_36dp"
+            fab:fab_icon="@drawable/ic_unfold_more_grey600_36dp"
             fab:fab_colorNormal="#fff"
             fab:fab_size="mini"
             fab:fab_title="Send and keep recieving"
