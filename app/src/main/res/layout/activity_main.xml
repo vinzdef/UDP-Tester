@@ -179,7 +179,7 @@
 
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/recieve_fab"
+            android:id="@+id/receive_fab"
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -187,7 +187,7 @@
             fab:fab_icon="@drawable/ic_chevron_down_grey600_36dp"
             fab:fab_colorNormal="#fff"
             fab:fab_size="mini"
-            fab:fab_title="Recieve"
+            fab:fab_title="Receive"
             fab:fab_colorPressed="#fafafa"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -201,13 +201,13 @@
             fab:fab_colorPressed="#fafafa"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/send_recieve_fab"
+            android:id="@+id/send_receive_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_icon="@drawable/ic_unfold_more_grey600_36dp"
             fab:fab_colorNormal="#fff"
             fab:fab_size="mini"
-            fab:fab_title="Send and keep recieving"
+            fab:fab_title="Send and keep receiving"
             fab:fab_colorPressed="#fafafa"/>
 
 

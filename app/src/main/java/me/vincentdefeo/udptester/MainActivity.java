@@ -8,7 +8,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.view.menu.ActionMenuItemView;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity
     private boolean receive = false, send = false, resetted = false;
     private boolean buttonAlreadyAnimated = false;
 
-    @OnClick(R.id.send_recieve_fab)
+    @OnClick(R.id.send_receive_fab)
     public void sendAndReceive()
     {
         send = true;
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @OnClick(R.id.recieve_fab)
+    @OnClick(R.id.receive_fab)
     public void recieve()
     {
         send = false;
