@@ -2,11 +2,7 @@ package me.vincentdefeo.udptester;
 
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.SnackbarManager;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,7 +20,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, String>
     private String message = "UDP Tester";
 
     private String hostname;
-    private int port, localPort = 0;
+    private int port, localPort = 4444;
     private String remoteMsg, localMsg;
 
     private MainActivity parentActivity;
@@ -40,6 +36,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, String>
         reset();
     }
 
+
     private void reset()
     {
         if (socket != null) socket.close();
@@ -52,7 +49,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, String>
         this.port = port;
         if (localPort != null) this.localPort = localPort;
 
-        if (message != null) this.message = message;
+        if (message != null && !message.equals("")) this.message = message;
         this.parentActivity = parentActivity;
         this.receive = receive;
         this.send = send;
@@ -64,8 +61,7 @@ public class PacketClientTask extends AsyncTask<Void, Void, String>
         String payload = null;
         try {
 
-            if (localPort != 0) socket = new DatagramSocket(localPort);
-            else socket = new DatagramSocket();
+            socket = new DatagramSocket(localPort);
 
             socket.connect(InetAddress.getByName(hostname), port);
 
@@ -114,24 +110,6 @@ public class PacketClientTask extends AsyncTask<Void, Void, String>
     protected void onPostExecute(String payload)
     {
         super.onPostExecute(payload);
-
-
-        if (justConnected)
-        new AlertDialog.Builder(parentActivity)
-                .setTitle("SOCKET INFO")
-                .setMessage(remoteMsg + "\n" + localMsg)
-                .setCancelable(true)
-                .create()
-                .show();
-
-        SnackbarManager.show(
-                Snackbar.with(parentActivity)
-                        .text((justConnected ? (!receive ? "Sent" : "Connected") : (payload != null ? "Packet received" : "Socket Error")))
-        );
-
-        if (receive) {
-            parentActivity.showResult(payload != null ? payload : "Error retrieving response");
-            if (payload != null) justConnected = false;
-        }
+        parentActivity.showFeedback(justConnected, remoteMsg, localMsg, payload);
     }
 }

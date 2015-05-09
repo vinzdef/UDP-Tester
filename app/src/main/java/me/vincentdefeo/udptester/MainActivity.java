@@ -12,6 +12,9 @@ import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
+import com.nispok.snackbar.listeners.EventListener;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -20,44 +23,41 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity
 {
-
     public final static String TAG = "UDP_SENDER";
 
-    @InjectView(R.id.server_host) EditText serverHostET;
-    @InjectView(R.id.server_port) EditText serverPortET;
-    @InjectView(R.id.local_port) EditText localPortET;
-    @InjectView(R.id.message) EditText messageET;
+    @InjectView(R.id.status)        TextView statusText;
+
+    @InjectView(R.id.reset_fab)     FloatingActionButton resetFab;
+    @InjectView(R.id.fab_menu)      FloatingActionsMenu fabMenu;
+
+    @InjectView(R.id.local_port)    EditText localPortET;
+    @InjectView(R.id.message)       EditText messageET;
+
+
+    @InjectView(R.id.server_host)   EditText serverHostET;
+    @InjectView(R.id.server_port)   EditText serverPortET;
 
     @InjectView(R.id.response_data) TextView responseText;
 
-    @InjectView(R.id.reset_fab)
-    FloatingActionButton resetFab;
-
-    @InjectView(R.id.fab_menu)
-    FloatingActionsMenu fabMenu;
-
-    @InjectView(R.id.status) TextView statusText;
-
-    PacketClientTask pct;
-    private boolean recieve = false, send = false;
-
-    private boolean resetted = false;
+    private PacketClientTask pct;
+    private boolean receive = false, send = false, resetted = false;
+    private boolean buttonAlreadyAnimated = false;
 
     @OnClick(R.id.send_recieve_fab)
     public void sendAndReceive()
     {
         send = true;
-        recieve = true;
+        receive = true;
 
         startUDP();
-        statusText.setText("LISTENING FOR INCOMING PACKETS");
+        statusText.setText("SENDING");
     }
 
     @OnClick(R.id.send_fab)
     public void send()
     {
         send = true;
-        recieve = false;
+        receive = false;
 
         startUDP();
         statusText.setText("SENDING");
@@ -68,10 +68,25 @@ public class MainActivity extends AppCompatActivity
     public void recieve()
     {
         send = false;
-        recieve = true;
+        receive = true;
 
         startUDP();
         statusText.setText("LISTENING FOR INCOMING PACKETS");
+    }
+
+    @OnClick(R.id.reset_fab)
+    public void resetConnection()
+    {
+        resetted = true;
+        pct.cancel(true);
+
+        resetFab.setVisibility(View.GONE);
+        fabMenu.setVisibility(View.VISIBLE);
+
+        receive = false;
+        send = false;
+
+        statusText.setText("IDLE");
     }
 
     private void startUDP()
@@ -97,7 +112,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        if (recieve) {
+        if (receive) {
             fabMenu.setVisibility(View.GONE);
             resetFab.setVisibility(View.VISIBLE);
         }
@@ -113,38 +128,23 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        String message = null;
-        if (messageET.getText().toString() != "")
-            message = messageET.getText().toString();
+        String message = messageET.getText().toString();
 
-        pct = new PacketClientTask(serverHost, serverPort, localPort, MainActivity.this, message, send, recieve);
+        pct = new PacketClientTask(serverHost, serverPort, localPort, MainActivity.this, message, send, receive);
         pct.execute();
-    }
-
-    @OnClick(R.id.reset_fab)
-    public void resetConnection()
-    {
-        resetted = true;
-        pct.cancel(true);
-
-        resetFab.setVisibility(View.GONE);
-        fabMenu.setVisibility(View.VISIBLE);
-
-        recieve = false;
-        send = false;
-
-        statusText.setText("IDLE");
     }
 
     protected void showResult(String data)
     {
-        if (recieve) responseText.setText(data);
+        if (receive) {
+            responseText.setText(data);
 
-        if (!(send && recieve))
-            PacketClientTask.alreadyConnected = false;
+            if (send)
+                PacketClientTask.alreadyConnected = false;
 
-        if (!resetted && recieve)
-            sendAndReceive();
+            if (!resetted)
+                recieve();
+        }
 
         Log.d(TAG, "DATA: " + data);
     }
@@ -158,6 +158,77 @@ public class MainActivity extends AppCompatActivity
 
         resetFab.setVisibility(View.GONE);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#009688")));
+
+        responseText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = responseText.getText().toString();
+                new ResultViewDialog(MainActivity.this, text).show();
+            }
+        });
+    }
+
+    public void showFeedback(boolean justConnected, String remoteMsg, String localMsg, String payload)
+    {
+        if (justConnected) {
+            new android.support.v7.app.AlertDialog.Builder(this)
+                    .setTitle("SOCKET INFO")
+                    .setMessage(remoteMsg + "\n" + localMsg)
+                    .setCancelable(true)
+                    .create()
+                    .show();
+        }
+
+
+        SnackbarManager.show(
+                Snackbar.with(this)
+                        .text((justConnected ? (!receive ? "Sent" : "Connected") : (payload != null ? "Packet received" : "Socket Error")))
+                        .eventListener(new EventListener() {
+                            @Override
+                            public void onShow(Snackbar snackbar) {
+                                if (!buttonAlreadyAnimated) {
+                                    resetFab.animate().translationYBy(-100);
+                                    fabMenu.animate().translationYBy(-100);
+                                    buttonAlreadyAnimated = true;
+                                }
+                            }
+
+                            @Override
+                            public void onShowByReplace(Snackbar snackbar) {
+
+                            }
+
+                            @Override
+                            public void onShown(Snackbar snackbar) {
+
+                            }
+
+                            @Override
+                            public void onDismiss(Snackbar snackbar) {
+                                if (buttonAlreadyAnimated) {
+                                    resetFab.animate().translationYBy(100);
+                                    fabMenu.animate().translationYBy(100);
+                                    buttonAlreadyAnimated = false;
+                                }
+                            }
+
+                            @Override
+                            public void onDismissByReplace(Snackbar snackbar) {
+
+                            }
+
+                            @Override
+                            public void onDismissed(Snackbar snackbar) {
+
+                            }
+                        }));
+
+
+
+        if (receive) {
+            showResult(payload != null ? payload : "Error retrieving response");
+            if (payload != null) PacketClientTask.justConnected = false;
+        } else statusText.setText("IDLE");
     }
 /*
 
